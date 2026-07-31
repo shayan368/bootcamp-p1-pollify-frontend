@@ -25,6 +25,12 @@ export default function SettingsPage() {
   const [pwErr, setPwErr] = useState("");
   const [savingPw, setSavingPw] = useState(false);
 
+  const [deleteStep, setDeleteStep] = useState(1);
+  const [deleteOtp, setDeleteOtp] = useState("");
+  const [deleteMsg, setDeleteMsg] = useState("");
+  const [deleteErr, setDeleteErr] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   const handleAvatar = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -69,6 +75,37 @@ export default function SettingsPage() {
       setPwErr(err.response?.data?.message || "Couldn't update password");
     } finally {
       setSavingPw(false);
+    }
+  };
+
+  const requestDelete = async () => {
+    setDeleteMsg("");
+    setDeleteErr("");
+    setDeleting(true);
+    try {
+      await usersApi.requestDeleteAccount();
+      setDeleteStep(2);
+      setDeleteMsg("OTP sent to your email. Check your inbox.");
+    } catch (err) {
+      setDeleteErr(err.response?.data?.message || "Failed to request account deletion");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmDelete = async (e) => {
+    e.preventDefault();
+    setDeleteMsg("");
+    setDeleteErr("");
+    setDeleting(true);
+    try {
+      await usersApi.deleteAccount(deleteOtp);
+      logout();
+      navigate("/register");
+    } catch (err) {
+      setDeleteErr(err.response?.data?.message || "Invalid OTP or failed to delete account");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -179,6 +216,63 @@ export default function SettingsPage() {
           {savingPw ? "Updating..." : "Update password"}
         </button>
       </form>
+
+      {/* Danger Zone */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-red-900/30 bg-red-950/10 p-6">
+        <p className="font-semibold text-red-500">Danger Zone</p>
+
+        {deleteErr && (
+          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">{deleteErr}</p>
+        )}
+        {deleteMsg && (
+          <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+            {deleteMsg}
+          </p>
+        )}
+
+        {deleteStep === 1 ? (
+          <div>
+            <p className="mb-4 text-sm text-neutral-400">
+              Permanently delete your account and all associated polls, comments, and votes. This action cannot be undone.
+            </p>
+            <button
+              onClick={requestDelete}
+              disabled={deleting}
+              className="w-fit rounded-lg bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-500/20 disabled:opacity-50"
+            >
+              {deleting ? "Requesting..." : "Delete account"}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={confirmDelete} className="flex flex-col gap-4">
+            <p className="text-sm text-neutral-400">
+              An OTP has been sent to your email. Enter it below to confirm deletion.
+            </p>
+            <Field label="Enter OTP" value={deleteOtp} onChange={setDeleteOtp} />
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={deleting || !deleteOtp}
+                className="rounded-lg bg-red-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Confirm Deletion"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteStep(1);
+                  setDeleteOtp("");
+                  setDeleteErr("");
+                  setDeleteMsg("");
+                }}
+                className="text-sm font-medium text-neutral-400 hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
 
       {/* the sidebar (with its own log out link) is desktop-only, so mobile users need
           another way to log out - this button only shows up below the md breakpoint */}

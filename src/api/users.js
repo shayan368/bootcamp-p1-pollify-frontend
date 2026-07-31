@@ -9,7 +9,9 @@ export const updateProfile = (formData) => client.put("/users/profile", formData
 export const changePassword = (currentPassword, newPassword) =>
   client.put("/users/change-password", { currentPassword, newPassword });
 
-export const deleteAccount = () => client.delete("/users/me");
+export const requestDeleteAccount = () => client.post("/users/request-delete-account");
+
+export const deleteAccount = (otp) => client.delete("/users/me", { data: { otp } });
 
 export const followUser = (userId) => client.put(`/users/${userId}/follow`);
 
