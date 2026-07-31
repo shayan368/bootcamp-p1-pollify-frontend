@@ -1,6 +1,6 @@
 import client from "./client";
 
-export const register = (formData) => client.post("/auth/register", formData);
+export const register = (payload) => client.post("/auth/register", payload);
 
 export const verifyOtp = (email, otp) => client.post("/auth/verify-otp", { email, otp });
 

@@ -29,10 +29,13 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
     try {
-      const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-      if (avatarFile) fd.append("avatar", avatarFile);
-      await authApi.register(fd);
+      const payload = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        username: form.username.trim(),
+        password: form.password,
+      };
+      await authApi.register(payload);
       setStep("otp");
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
