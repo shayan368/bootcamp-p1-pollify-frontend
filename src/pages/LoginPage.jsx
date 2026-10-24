@@ -83,7 +83,11 @@ export default function LoginPage() {
         <label className="block">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">Password</span>
-            <button type="button" className="text-xs font-medium text-emerald-400 hover:underline">
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password", { state: { email } })}
+              className="text-xs font-medium text-emerald-400 hover:underline"
+            >
               Forgot password?
             </button>
           </div>

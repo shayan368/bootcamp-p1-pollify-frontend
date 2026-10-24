@@ -18,7 +18,13 @@ client.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem("pollify_token");
       localStorage.removeItem("pollify_user");
-      if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/signup")) {
+      const path = window.location.pathname;
+      if (
+        !path.startsWith("/login") &&
+        !path.startsWith("/signup") &&
+        !path.startsWith("/forgot-password") &&
+        !path.startsWith("/reset-password")
+      ) {
         window.location.href = "/login";
       }
     }
